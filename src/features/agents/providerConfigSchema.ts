@@ -59,3 +59,21 @@ export const agentProviderConfigSchema = z
   });
 
 export type AgentProviderConfigValues = z.infer<typeof agentProviderConfigSchema>;
+/** Shared validation for model behavior settings and token limits. */
+export const agentConfigPanelSchema = z.object({
+  provider: z.enum(agentProviderTypes),
+  model: z.string().trim().min(1, 'Model is required.').max(120),
+  temperature: z.coerce
+    .number({ invalid_type_error: 'Temperature must be a number.' })
+    .finite('Temperature must be a finite number.')    .min(0, 'Temperature cannot be below 0.')
+    .max(2, 'Temperature cannot exceed 2.'),
+  maxTokens: z.coerce
+    .number({ invalid_type_error: 'Max tokens must be a number.' })
+    .int('Max tokens must be a whole number.')
+    .min(1, 'Max tokens must be at least 1.')
+    .max(200_000, 'Max tokens cannot exceed 200,000.'),
+  systemPrompt: z.string().trim().min(1, 'System prompt is required.').max(20_000),
+  systemPromptTemplate: z.string().max(100).optional().or(z.literal('')),
+});
+
+export type AgentConfigPanelValues = z.infer<typeof agentConfigPanelSchema>;
